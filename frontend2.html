@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Populated Dropdown</title>
+    <title>Results Importer</title>
 </head>
 <body>
     <h2>Static display for demo only</h2>
@@ -26,12 +26,11 @@
         const dropdown3 = document.getElementById('myDropdown3');
         const contentDiv = document.getElementById('content');
 
-        //console.log(server_origin);
         // Clear the first dropdown
         dropdown.innerHTML = '';
 
         // Fetch data for the first dropdown
-        fetch(server_origin+'/orp_scraper.php?type=periods')
+        fetch(server_origin + '/orp_scraper.php?type=periods')
             .then(response => response.json())
             .then(return_data => {
 
@@ -65,12 +64,11 @@
                     dropdown2.appendChild(defaultOption2);
         
                     // Fetch new data based on the selected option in the first dropdown
-                    fetch(server_origin+'/orp_scraper.php?type=competition_list&param='+this.value)
+                    fetch(server_origin + '/orp_scraper.php?type=competition_list&param=' + this.value)
                         .then(response => response.json())
                         .then(newData => {
                             // Populate the other dropdowns with the new data
                             newData.data.forEach(data => {
-                                // console.log(data['competition_id'] + ' ' + data['competition_name']);
                                 const optionElement2 = document.createElement('option');
                                 optionElement2.value = data['competition_id'];
                                 optionElement2.textContent = data['competition_name'];
@@ -101,7 +99,6 @@
                         .then(newData => {
                             // Populate the other dropdowns with the new data
                             newData.data.forEach(data => {
-                                // console.log(data['competition_id'] + ' ' + data['competition_name']);
                                 const optionElement3 = document.createElement('option');
                                 optionElement3.value = data['team_id'];
                                 optionElement3.textContent = data['team_name'];
@@ -120,15 +117,19 @@
             // Add event listener to the third dropdown
             dropdown3.addEventListener('change', function() {
                 // Clear the content div
-                
                 contentDiv.innerHTML = '';
 
                 // Fetch new data based on the selected option in the first dropdown
+                resultsHTML = '';
+
                 fetch(server_origin+'/orp_scraper.php?type=team_results&param='+this.value)
                     .then(response => response.json())
                     .then(newData => {
                         // Populate the content div with the new data
-                        contentDiv.innerHTML = newData.data;
+                        for(var key in newData.data){
+                            resultsHTML += newData.data[key];
+                            }
+                        contentDiv.innerHTML = resultsHTML;
                     })
                     .catch(error => {
                         console.error('Error fetching new data:', error);
