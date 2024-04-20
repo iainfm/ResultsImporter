@@ -17,6 +17,7 @@
     <select id="myDropdown3"></select>
 
     <div id="content"></div>
+    <div id = "url"></div>
 
     <script>
 
@@ -25,6 +26,7 @@
         const dropdown2 = document.getElementById('myDropdown2');
         const dropdown3 = document.getElementById('myDropdown3');
         const contentDiv = document.getElementById('content');
+        const urlDiv = document.getElementById('url');
 
         // Clear the first dropdown
         dropdown.innerHTML = '';
@@ -56,6 +58,7 @@
                     dropdown2.innerHTML = '';
                     dropdown3.innerHTML = '';
                     contentDiv.innerHTML = '';
+                    // urlDiv.innerHTML = '';
 
                     // Create a default option for the second dropdown
                     const defaultOption2 = document.createElement('option');
@@ -121,8 +124,13 @@
 
                 // Fetch new data based on the selected option in the first dropdown
                 resultsHTML = '';
+                urlHTML = '';
+                urlHTML = "<a href='https://results.nsra.co.uk/modules/results/league/teams/summary?team_id=";
+                urlHTML += this.value;
+                urlHTML += "'>Link to NSRA results</a>";
+                urlDiv.innerHTML = urlHTML;
 
-                fetch(server_origin+'/orp_scraper.php?type=team_results&param='+this.value)
+                fetch(server_origin+'/orp_scraper.php?type=team_results&param=' + this.value)
                     .then(response => response.json())
                     .then(newData => {
                         // Populate the content div with the new data
@@ -138,5 +146,4 @@
 
     </script>
 </body>
-<div id="content"/>
 </html>
