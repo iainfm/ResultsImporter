@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populated Dropdown</title>
+</head>
+<body>
+    <h2>Static display for demo only</h2>
+    <label for="myDropdown">Select a season:</label>
+    <select id="myDropdown"></select>
+
+    <label for="myDropdown2">Select a competition:</label>
+    <select id="myDropdown2"></select>
+
+    <label for="myDropdown3">Select a team:</label>
+    <select id="myDropdown3"></select>
+
+    <div id="content"></div>
+
+    <script>
+
+        var server_origin = window.location.origin;
+        const dropdown = document.getElementById('myDropdown');
+        const dropdown2 = document.getElementById('myDropdown2');
+        const dropdown3 = document.getElementById('myDropdown3');
+        const contentDiv = document.getElementById('content');
+
+        //console.log(server_origin);
+        // Clear the first dropdown
+        dropdown.innerHTML = '';
+
+        // Fetch data for the first dropdown
+        fetch(server_origin+'/orp_scraper.php?type=periods')
+            .then(response => response.json())
+            .then(return_data => {
+
+                // Create a default option for the first dropdown
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a season';
+                dropdown.appendChild(defaultOption); 
+
+                // Create options based on the fetched data
+                return_data.data.forEach(mydata => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = mydata.option;
+                    optionElement.textContent = mydata.option; // Set the display text
+                    dropdown.appendChild(optionElement);
+                });
+        
+                // Add event listener to the first dropdown
+                dropdown.addEventListener('change', function() {
+                    // Clear the other dropdowns
+                    const dropdown2 = document.getElementById('myDropdown2');
+                    const dropdown3 = document.getElementById('myDropdown3');
+                    dropdown2.innerHTML = '';
+                    dropdown3.innerHTML = '';
+                    contentDiv.innerHTML = '';
+
+                    // Create a default option for the second dropdown
+                    const defaultOption2 = document.createElement('option');
+                    defaultOption2.value = '';
+                    defaultOption2.textContent = 'Select a competition';
+                    dropdown2.appendChild(defaultOption2);
+        
+                    // Fetch new data based on the selected option in the first dropdown
+                    fetch(server_origin+'/orp_scraper.php?type=competition_list&param='+this.value)
+                        .then(response => response.json())
+                        .then(newData => {
+                            // Populate the other dropdowns with the new data
+                            newData.data.forEach(data => {
+                                // console.log(data['competition_id'] + ' ' + data['competition_name']);
+                                const optionElement2 = document.createElement('option');
+                                optionElement2.value = data['competition_id'];
+                                optionElement2.textContent = data['competition_name'];
+                                dropdown2.appendChild(optionElement2);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching new data:', error);
+                        });
+                });
+
+                // Add event listener to the second dropdown
+                dropdown2.addEventListener('change', function() {
+                    // Clear the third dropdown
+                    const dropdown3 = document.getElementById('myDropdown3');
+                    dropdown3.innerHTML = '';
+                    contentDiv.innerHTML = '';
+
+                    // Create a default option for the third dropdown
+                    const defaultOption3 = document.createElement('option');
+                    defaultOption3.value = '';
+                    defaultOption3.textContent = 'Select a team';
+                    dropdown3.appendChild(defaultOption3);
+        
+                    // Fetch new data based on the selected option in the first dropdown
+                    fetch(server_origin+'/orp_scraper.php?type=team_ids&param='+this.value)
+                        .then(response => response.json())
+                        .then(newData => {
+                            // Populate the other dropdowns with the new data
+                            newData.data.forEach(data => {
+                                // console.log(data['competition_id'] + ' ' + data['competition_name']);
+                                const optionElement3 = document.createElement('option');
+                                optionElement3.value = data['team_id'];
+                                optionElement3.textContent = data['team_name'];
+                                dropdown3.appendChild(optionElement3);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching new data:', error);
+                        });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+            // Add event listener to the third dropdown
+            dropdown3.addEventListener('change', function() {
+                // Clear the content div
+                
+                contentDiv.innerHTML = '';
+
+                // Fetch new data based on the selected option in the first dropdown
+                fetch(server_origin+'/orp_scraper.php?type=team_results&param='+this.value)
+                    .then(response => response.json())
+                    .then(newData => {
+                        // Populate the content div with the new data
+                        contentDiv.innerHTML = newData.data;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching new data:', error);
+                    });
+            });
+
+    </script>
+</body>
+<div id="content"/>
+</html>

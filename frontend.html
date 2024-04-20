@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populated Dropdown</title>
+</head>
+<body>
+    <h2>Static display for demo only</h2>
+    <label for="myDropdown">Select an option:</label>
+    <select id="myDropdown"></select>
+
+    <label for="myDropdown2">Select an option:</label>
+    <select id="myDropdown2"></select>
+
+    <label for="myDropdown3">Select an option:</label>
+    <select id="myDropdown3"></select>
+
+    <div id="content"></div>
+
+    <script>
+
+        var server_origin = window.location.origin;
+        //console.log(server_origin);
+
+        // Fetch data from the PHP JSON API
+        //    list of NSRA Periond
+        fetch(server_origin+'/orp_scraper.php?type=periods')
+            .then(response => response.json())
+            .then(return_data => {
+                const dropdown = document.getElementById('myDropdown');
+
+                // Create options based on the fetched data
+                return_data.data.forEach(mydata => {
+                    //console.log(mydata);                    
+                    const optionElement = document.createElement('option');
+                    optionElement.value = mydata.option;
+                    optionElement.textContent = mydata.option; // Set the display text
+                    dropdown.appendChild(optionElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+        // Fetch data from the PHP JSON API
+        //  list of NSRA Competition Names for Period from period as listed from above
+        my_period = 'Winter 23-24';
+        fetch(server_origin+'/orp_scraper.php?type=competition_list&param='+my_period)
+            .then(response => response.json())
+            .then(return_data => {
+                const dropdown2 = document.getElementById('myDropdown2');
+
+                // Create options based on the fetched data
+                return_data.data.forEach(mydata => {
+                    //console.log(mydata);                    
+                    const optionElement = document.createElement('option');
+                    optionElement.value = mydata['competition_id'] // Set the value (customize this)
+                    optionElement.textContent = mydata['competition_name']; // Set the display text
+                    dropdown2.appendChild(optionElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+        // Fetch data from the PHP JSON API
+        //   list of NSRA Teams & IDs for Competition as Listed above
+        my_competition_id = '261';
+        fetch(server_origin+'/orp_scraper.php?type=team_ids&param='+my_competition_id)
+            .then(response => response.json())
+            .then(return_data => {
+                const dropdown3 = document.getElementById('myDropdown3');
+
+                // Create options based on the fetched data
+                return_data.data.forEach(mydata => {
+                    //console.log(mydata);                    
+                    const optionElement = document.createElement('option');
+                    optionElement.value = mydata['team_id'] // Set the value (customize this)
+                    optionElement.textContent = mydata['team_name']; // Set the display text
+                    dropdown3.appendChild(optionElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+        // Fetch JSON data from the API
+        //    get the Team Results html page for the Tead ID from above
+        my_team_id = '1900';
+        const apiUrl = server_origin+'/orp_scraper.php?type=team_results&param='+my_team_id;
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(return_data => {
+                // Assuming your JSON data contains an 'html' property
+                const htmlContent = return_data.data; // Adjust this based on your actual data structure
+
+                // Create a new div to hold the HTML content
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = htmlContent;
+                })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+
+    </script>
+</body>
+</html>
