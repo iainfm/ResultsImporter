@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results Importer</title>
+</head>
+<body>
+    <h2>NSRA Results Importer</h2>
+    <label for="ddSeason">Select a season:</label>
+    <select id="ddSeason"></select>
+
+    <label for="ddCompetition">Select a competition:</label>
+    <select id="ddCompetition"></select>
+
+    <label for="ddTeam">Select a team:</label>
+    <select id="ddTeam"></select>
+
+    <div id="content"></div>
+    <p></p>
+    <div id = "url"></div>
+    <p></p>
+    <div id = "download">
+        <a href="#" onclick="download_table_as_csv();">Download as CSV</a>
+    </div>
+    <p />
+    <footer>
+        <p>
+            This site it not affiliated with the NSRA or X-Ring Software in any way. Use at your own risk. No responsibility is accepted for incorrect information. 
+        </p>
+    </footer>
+    <script>
+
+function download_table_as_csv(separator = ',') {
+        // Thanks to https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
+        // Select rows from table
+        var rows = document.querySelectorAll('table.team-summary tr');
+        // Construct csv
+        var csv = [];
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll('td, th');
+            for (var j = 0; j < cols.length; j++) {
+                // Clean innertext to remove multiple spaces and jumpline (break csv)
+                var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+
+                // remove non-printable and other non-valid chars
+                data = data.replace(/[^ -~]+/g, '');
+
+                // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
+                data = data.replace(/"/g, '""');
+                // Push escaped string
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(separator));
+        }
+        var csv_string = csv.join('\n');
+        // Download it
+        // var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
+        var filename = dropdown.value + '_' + dropdown2.options[dropdown2.selectedIndex].text + '_' + dropdown3.options[dropdown3.selectedIndex].text + '.csv';
+        var link = document.createElement('a');
+        link.style.display = 'none';
+        link.setAttribute('target', '_blank');
+        link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        }
+
+        var server_origin = window.location.origin;
+        const dropdown = document.getElementById('ddSeason');
+        const dropdown2 = document.getElementById('ddCompetition');
+        const dropdown3 = document.getElementById('ddTeam');
+        const contentDiv = document.getElementById('content');
+        const urlDiv = document.getElementById('url');
+        const dlDiv = document.getElementById('download');
+
+        // Hide the download link
+        dlDiv.style.display = 'none';
+
+        // Clear the first dropdown
+        dropdown.innerHTML = '';
+
+        // Fetch data for the first dropdown
+        fetch(server_origin + '/orp_scraper.php?type=periods')
+            .then(response => response.json())
+            .then(return_data => {
+
+                // Create a default option for the first dropdown
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a season';
+                dropdown.appendChild(defaultOption); 
+
+                // Create options based on the fetched data
+                for (let mydata of return_data.data) {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = mydata.option;
+                    optionElement.textContent = mydata.option; // Set the display text
+                    dropdown.appendChild(optionElement);
+                };
+        
+                // Add event listener to the first dropdown
+                dropdown.addEventListener('change', function() {
+                    // Clear the other dropdowns
+                    const dropdown2 = document.getElementById('ddCompetition');
+                    const dropdown3 = document.getElementById('ddTeam');
+                    dropdown2.innerHTML = '';
+                    dropdown3.innerHTML = '';
+                    contentDiv.innerHTML = '';
+                    urlDiv.innerHTML = '';
+                    dlDiv.style.display = 'none';
+
+                    // Create a default option for the second dropdown
+                    const defaultOption2 = document.createElement('option');
+                    defaultOption2.value = '';
+                    defaultOption2.textContent = 'Select a competition';
+                    dropdown2.appendChild(defaultOption2);
+        
+                    // Fetch new data based on the selected option in the first dropdown
+                    fetch(server_origin + '/orp_scraper.php?type=competition_list&param=' + this.value)
+                        .then(response => response.json())
+                        .then(newData => {
+                            // Populate the other dropdowns with the new data
+                            
+                            for (data of newData.data) {
+                                const optionElement2 = document.createElement('option');
+                                optionElement2.value = data['competition_id'];
+                                optionElement2.textContent = data['competition_name'];
+                                dropdown2.appendChild(optionElement2);
+                            };
+                        })
+                        .catch(error => {
+                            console.error('Error fetching new data:', error);
+                        });
+                });
+
+                // Add event listener to the second dropdown
+                dropdown2.addEventListener('change', function() {
+                    // Clear the third dropdown
+                    const dropdown3 = document.getElementById('ddTeam');
+                    dropdown3.innerHTML = '';
+                    contentDiv.innerHTML = '';
+                    urlDiv.innerHTML = '';
+                    dlDiv.style.display = 'none';
+
+                    // Create a default option for the third dropdown
+                    const defaultOption3 = document.createElement('option');
+                    defaultOption3.value = '';
+                    defaultOption3.textContent = 'Select a team';
+                    dropdown3.appendChild(defaultOption3);
+        
+                    // Fetch new data based on the selected option in the first dropdown
+                    fetch(server_origin+'/orp_scraper.php?type=team_ids&param='+this.value)
+                        .then(response => response.json())
+                        .then(newData => {
+                            // Populate the other dropdowns with the new data
+                            for (let data of newData.data) {
+                                const optionElement3 = document.createElement('option');
+                                optionElement3.value = data['team_id'];
+                                optionElement3.textContent = data['team_name'];
+                                dropdown3.appendChild(optionElement3);
+                            };
+                        })
+                        .catch(error => {
+                            console.error('Error fetching new data:', error);
+                        });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+            // Add event listener to the third dropdown
+            dropdown3.addEventListener('change', function() {
+                // Clear the content div
+                contentDiv.innerHTML = '';
+
+                // Fetch new data based on the selected option in the first dropdown
+                resultsHTML = '';
+                urlHTML = '';
+                urlHTML = "<a href='https://results.nsra.co.uk/modules/results/league/teams/summary?team_id=";
+                urlHTML += this.value;
+                urlHTML += "'>Link to NSRA results for team " + this.value + "</a>";
+                urlDiv.innerHTML = urlHTML;
+
+                fetch(server_origin+'/orp_scraper.php?type=team_results&param=' + this.value)
+                    .then(response => response.json())
+                    .then(newData => {
+                        // Populate the content div with the new data
+                        for(var key in newData.data){
+                            resultsHTML += newData.data[key];
+                            }
+                        contentDiv.innerHTML = resultsHTML;
+
+                        // Fix the table in various ways
+                        let table = document.querySelectorAll('table.team-summary tr');
+
+                        // Clear empty cells
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<th class="sep"></th>', '') }
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<td class="sep"></td>', '') }
+
+                        // Replace NSRs with zero score
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('NSR', '0') }
+
+                        // Add a column for the average score
+                        for (row of table) {
+                            if ((row.cells[0].outerHTML == '<th>&nbsp;</th>') || (row.cells[0].outerHTML == '<td>nbsp;</td>')) {
+                                newcell = row.insertCell(1);
+                                newcell.outerHTML='<th>&nbsp;</th>';
+                                last_hr = row;
+                            }
+                        }
+
+                        // Add the header for the average column and fix the <th></th> in the last cell of the header row
+                        last_hr.cells[1].outerHTML='<th>Average</th>';
+                        last_hr.cells[last_hr.cells.length-1].outerHTML='<th>' + last_hr.cells[last_hr.cells.length-1].innerHTML + '</th>';
+
+                        // Split average from name
+                        for (row of table) {
+                            row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;&nbsp;', '</td><td>')
+                            row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;', '</td>')
+                            }
+
+                        dlDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching new data:', error);
+                    });
+            });
+
+    </script>
+</body>
+</html>
