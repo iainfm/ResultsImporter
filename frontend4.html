@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Results Importer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tr:hover {
+            background-color: #ddd;
+        }
+        
+        dlDiv {
+            display: none;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <h2>Working dropdowns demo</h2>
@@ -205,7 +242,8 @@ function download_table_as_csv(separator = ',') {
                         // Add a column for the average score
                         // TODO: Handle tables with multiple cards per round (maybe all rows with an empty cell in the first column?)
                         newcell = table[0].insertCell(1);
-                        newcell.innerHTML='<B>Average</B>';
+                        // console.log(newcell.outerHTML);
+                        newcell.outerHTML='<th>Average</th>';
 
                         // Split average from name
                         for (row of table) {
