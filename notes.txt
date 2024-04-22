@@ -8,6 +8,7 @@ clear empty cells:
 for (row of table) { row.innerHTML = row.innerHTML.replace('<th class="sep"></th>', '') }
 for (row of table) { row.innerHTML = row.innerHTML.replace('<td class="sep"></td>', '') }
 
+// Split average from name
 for (row of table) {
     row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;&nbsp;', '</td><td>')
     row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;', '</td>')
