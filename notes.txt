@@ -4,7 +4,7 @@ rows[0].insertCell(1)
 newcell = rows[0].insertCell(1)
 newcell.innerHTML='<B>Average</B>'
 
-clear empty cells:
+// clear empty cells:
 for (row of table) { row.innerHTML = row.innerHTML.replace('<th class="sep"></th>', '') }
 for (row of table) { row.innerHTML = row.innerHTML.replace('<td class="sep"></td>', '') }
 
