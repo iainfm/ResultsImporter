@@ -57,7 +57,7 @@ function download_table_as_csv(separator = ',') {
         var csv_string = csv.join('\n');
         // Download it
         // var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
-        var filename = dropdown.value + '_' + dropdown2.options[dropdown2.selectedIndex].text + '_' + dropdown3.options[dropdown3.selectedIndex].text + '.csv';
+        var filename = ddSeason.value + '_' + ddCompetition.options[ddCompetition.selectedIndex].text + '_' + ddTeam.options[ddTeam.selectedIndex].text + '.csv';
         var link = document.createElement('a');
         link.style.display = 'none';
         link.setAttribute('target', '_blank');
@@ -69,9 +69,9 @@ function download_table_as_csv(separator = ',') {
         }
 
         var server_origin = window.location.origin;
-        const dropdown = document.getElementById('ddSeason');
-        const dropdown2 = document.getElementById('ddCompetition');
-        const dropdown3 = document.getElementById('ddTeam');
+        const ddSeason = document.getElementById('ddSeason');
+        const ddCompetition = document.getElementById('ddCompetition');
+        const ddTeam = document.getElementById('ddTeam');
         const contentDiv = document.getElementById('content');
         const urlDiv = document.getElementById('url');
         const dlDiv = document.getElementById('download');
@@ -80,7 +80,7 @@ function download_table_as_csv(separator = ',') {
         dlDiv.style.display = 'none';
 
         // Clear the first dropdown
-        dropdown.innerHTML = '';
+        ddSeason.innerHTML = '';
 
         // Fetch data for the first dropdown
         fetch(server_origin + '/orp_scraper.php?type=periods')
@@ -91,23 +91,23 @@ function download_table_as_csv(separator = ',') {
                 const defaultOption = document.createElement('option');
                 defaultOption.value = '';
                 defaultOption.textContent = 'Select a season';
-                dropdown.appendChild(defaultOption); 
+                ddSeason.appendChild(defaultOption); 
 
                 // Create options based on the fetched data
                 for (let mydata of return_data.data) {
                     const optionElement = document.createElement('option');
                     optionElement.value = mydata.option;
                     optionElement.textContent = mydata.option; // Set the display text
-                    dropdown.appendChild(optionElement);
+                    ddSeason.appendChild(optionElement);
                 };
         
                 // Add event listener to the first dropdown
-                dropdown.addEventListener('change', function() {
+                ddSeason.addEventListener('change', function() {
                     // Clear the other dropdowns
-                    const dropdown2 = document.getElementById('ddCompetition');
-                    const dropdown3 = document.getElementById('ddTeam');
-                    dropdown2.innerHTML = '';
-                    dropdown3.innerHTML = '';
+                    const ddCompetition = document.getElementById('ddCompetition');
+                    const ddTeam = document.getElementById('ddTeam');
+                    ddCompetition.innerHTML = '';
+                    ddTeam.innerHTML = '';
                     contentDiv.innerHTML = '';
                     urlDiv.innerHTML = '';
                     dlDiv.style.display = 'none';
@@ -116,7 +116,7 @@ function download_table_as_csv(separator = ',') {
                     const defaultOption2 = document.createElement('option');
                     defaultOption2.value = '';
                     defaultOption2.textContent = 'Select a competition';
-                    dropdown2.appendChild(defaultOption2);
+                    ddCompetition.appendChild(defaultOption2);
         
                     // Fetch new data based on the selected option in the first dropdown
                     fetch(server_origin + '/orp_scraper.php?type=competition_list&param=' + this.value)
@@ -128,7 +128,7 @@ function download_table_as_csv(separator = ',') {
                                 const optionElement2 = document.createElement('option');
                                 optionElement2.value = data['competition_id'];
                                 optionElement2.textContent = data['competition_name'];
-                                dropdown2.appendChild(optionElement2);
+                                ddCompetition.appendChild(optionElement2);
                             };
                         })
                         .catch(error => {
@@ -137,10 +137,10 @@ function download_table_as_csv(separator = ',') {
                 });
 
                 // Add event listener to the second dropdown
-                dropdown2.addEventListener('change', function() {
+                ddCompetition.addEventListener('change', function() {
                     // Clear the third dropdown
-                    const dropdown3 = document.getElementById('ddTeam');
-                    dropdown3.innerHTML = '';
+                    const ddTeam = document.getElementById('ddTeam');
+                    ddTeam.innerHTML = '';
                     contentDiv.innerHTML = '';
                     urlDiv.innerHTML = '';
                     dlDiv.style.display = 'none';
@@ -149,7 +149,7 @@ function download_table_as_csv(separator = ',') {
                     const defaultOption3 = document.createElement('option');
                     defaultOption3.value = '';
                     defaultOption3.textContent = 'Select a team';
-                    dropdown3.appendChild(defaultOption3);
+                    ddTeam.appendChild(defaultOption3);
         
                     // Fetch new data based on the selected option in the first dropdown
                     fetch(server_origin+'/orp_scraper.php?type=team_ids&param='+this.value)
@@ -160,7 +160,7 @@ function download_table_as_csv(separator = ',') {
                                 const optionElement3 = document.createElement('option');
                                 optionElement3.value = data['team_id'];
                                 optionElement3.textContent = data['team_name'];
-                                dropdown3.appendChild(optionElement3);
+                                ddTeam.appendChild(optionElement3);
                             };
                         })
                         .catch(error => {
@@ -173,7 +173,7 @@ function download_table_as_csv(separator = ',') {
             });
 
             // Add event listener to the third dropdown
-            dropdown3.addEventListener('change', function() {
+            ddTeam.addEventListener('change', function() {
                 // Clear the content div
                 contentDiv.innerHTML = '';
 
