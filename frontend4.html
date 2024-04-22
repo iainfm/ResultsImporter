@@ -196,11 +196,14 @@ function download_table_as_csv(separator = ',') {
                         let table = document.querySelectorAll('table.team-summary tr');
 
                         // Clear empty cells
-                        for (row of table) { row.innerHTML = row.innerHTML.replace('<th class="sep"></th>', '') }
-                        for (row of table) { row.innerHTML = row.innerHTML.replace('<td class="sep"></td>', '') }
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<th class="sep"></th>', '') }
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<td class="sep"></td>', '') }
+
+                        // Replace NSRs with 0 score
+                        for (row of table) { row.innerHTML = row.innerHTML.replaceAll('NSR', '0') }
 
                         // Add a column for the average score
-                        table[0].insertCell(1);
+                        // TODO: Handle tables with multiple cards per round (maybe all rows with an empty cell in the first column?)
                         newcell = table[0].insertCell(1);
                         newcell.innerHTML='<B>Average</B>';
 
