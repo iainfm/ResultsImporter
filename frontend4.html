@@ -43,15 +43,15 @@
     </style>
 </head>
 <body>
-    <h2>Working dropdowns demo</h2>
-    <label for="myDropdown">Select a season:</label>
-    <select id="myDropdown"></select>
+    <h2>NSRA Results Importer</h2>
+    <label for="ddSeason">Select a season:</label>
+    <select id="ddSeason"></select>
 
-    <label for="myDropdown2">Select a competition:</label>
-    <select id="myDropdown2"></select>
+    <label for="ddCompetition">Select a competition:</label>
+    <select id="ddCompetition"></select>
 
-    <label for="myDropdown3">Select a team:</label>
-    <select id="myDropdown3"></select>
+    <label for="ddTeam">Select a team:</label>
+    <select id="ddTeam"></select>
 
     <div id="content"></div>
     <p></p>
@@ -74,10 +74,6 @@ function download_table_as_csv(separator = ',') {
             for (var j = 0; j < cols.length; j++) {
                 // Clean innertext to remove multiple spaces and jumpline (break csv)
                 var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
-
-                // Clean the empty separators
-                data = data.replace('<th class="sep"></th>', '');
-                data = data.replace('<td class="sep"></td>', '');
 
                 // remove non-printable and other non-valid chars
                 data = data.replace(/[^ -~]+/g, '');
@@ -104,9 +100,9 @@ function download_table_as_csv(separator = ',') {
         }
 
         var server_origin = window.location.origin;
-        const dropdown = document.getElementById('myDropdown');
-        const dropdown2 = document.getElementById('myDropdown2');
-        const dropdown3 = document.getElementById('myDropdown3');
+        const dropdown = document.getElementById('ddSeason');
+        const dropdown2 = document.getElementById('ddCompetition');
+        const dropdown3 = document.getElementById('ddTeam');
         const contentDiv = document.getElementById('content');
         const urlDiv = document.getElementById('url');
         const dlDiv = document.getElementById('download');
@@ -139,8 +135,8 @@ function download_table_as_csv(separator = ',') {
                 // Add event listener to the first dropdown
                 dropdown.addEventListener('change', function() {
                     // Clear the other dropdowns
-                    const dropdown2 = document.getElementById('myDropdown2');
-                    const dropdown3 = document.getElementById('myDropdown3');
+                    const dropdown2 = document.getElementById('ddCompetition');
+                    const dropdown3 = document.getElementById('ddTeam');
                     dropdown2.innerHTML = '';
                     dropdown3.innerHTML = '';
                     contentDiv.innerHTML = '';
@@ -174,7 +170,7 @@ function download_table_as_csv(separator = ',') {
                 // Add event listener to the second dropdown
                 dropdown2.addEventListener('change', function() {
                     // Clear the third dropdown
-                    const dropdown3 = document.getElementById('myDropdown3');
+                    const dropdown3 = document.getElementById('ddTeam');
                     dropdown3.innerHTML = '';
                     contentDiv.innerHTML = '';
                     urlDiv.innerHTML = '';
@@ -217,7 +213,7 @@ function download_table_as_csv(separator = ',') {
                 urlHTML = '';
                 urlHTML = "<a href='https://results.nsra.co.uk/modules/results/league/teams/summary?team_id=";
                 urlHTML += this.value;
-                urlHTML += "'>Link to NSRA results</a>";
+                urlHTML += "'>Link to NSRA results for team " + this.value + "</a>";
                 urlDiv.innerHTML = urlHTML;
 
                 fetch(server_origin+'/orp_scraper.php?type=team_results&param=' + this.value)
@@ -236,14 +232,21 @@ function download_table_as_csv(separator = ',') {
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<th class="sep"></th>', '') }
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<td class="sep"></td>', '') }
 
-                        // Replace NSRs with 0 score
+                        // Replace NSRs with zero score
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('NSR', '0') }
 
                         // Add a column for the average score
-                        // TODO: Handle tables with multiple cards per round (maybe all rows with an empty cell in the first column?)
-                        newcell = table[0].insertCell(1);
-                        // console.log(newcell.outerHTML);
-                        newcell.outerHTML='<th>Average</th>';
+                        for (row of table) {
+                            if ((row.cells[0].outerHTML == '<th>&nbsp;</th>') || (row.cells[0].outerHTML == '<td>nbsp;</td>')) {
+                                newcell = row.insertCell(1);
+                                newcell.outerHTML='<th>&nbsp;</th>';
+                                last_hr = row;
+                            }
+                        }
+
+                        // Add the header for the average column and fix the <th></th> in the last cell of the header row
+                        last_hr.cells[1].outerHTML='<th>Average</th>';
+                        last_hr.cells[last_hr.cells.length-1].outerHTML='<th>' + last_hr.cells[last_hr.cells.length-1].innerHTML + '</th>';
 
                         // Split average from name
                         for (row of table) {
