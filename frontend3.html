@@ -44,8 +44,6 @@ function download_table_as_csv(separator = ',') {
 
                 // remove non-printable and other non-valid chars
                 data = data.replace(/[^ -~]+/g, '');
-                // Clean the weird 0xC2 characters until I find where they're coming from
-                // data = data.replace(/[\xC2]/g, '');
 
                 // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
                 data = data.replace(/"/g, '""');
@@ -56,7 +54,8 @@ function download_table_as_csv(separator = ',') {
         }
         var csv_string = csv.join('\n');
         // Download it
-        var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
+        // var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
+        var filename = dropdown.value + '_' + dropdown2.options[dropdown2.selectedIndex].text + '_' + dropdown3.options[dropdown3.selectedIndex].text + '.csv';
         var link = document.createElement('a');
         link.style.display = 'none';
         link.setAttribute('target', '_blank');
