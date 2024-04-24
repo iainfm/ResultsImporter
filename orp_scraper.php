@@ -3,7 +3,6 @@
     $orp_competition_page_address = "https://results.nsra.co.uk/nsra/results/";
     $orp_team_results_page_address = "https://results.nsra.co.uk/modules/results/league/teams/summary?team_id=";
 
-
     header("Content-Type: application/json; charset=UTF-8");
 
     if (!_isCurlInstalled()) {
@@ -188,7 +187,7 @@
         if ($html_lines['status']=='error') {
             return $html_lines;
         }
-        $html_lines = $html_lines['message'];
+        $html_lines = (array)$html_lines['message'];
         $team_array = array();
         $ct = 0;
         foreach ($html_lines as $line) {
@@ -238,7 +237,7 @@
         $period = "";
         $cl = array();
 
-        $html_content = get_url($orp_address);
+        $html_content = (array)get_url($orp_address);
 
         if ($html_content['status']=='error') {
             return $html_content;
@@ -264,8 +263,6 @@
                                             'competition_id' => $comppageid,
                                             'competition_name' => $compname];
                         $cl[] = $line_array;
-                        //array_push($line_array, $period, $comppageid, $compname);
-                        //array_push($cl, $line_array);
                     }
                 }
             }
@@ -307,12 +304,11 @@
         //search html lines for Summer or Winter or BUCS
 
         $index = 0;
-        $content = $html_content['message'];
+        $content = (array)$html_content['message'];
         foreach ($content as $ln) {
             if (preg_match('/(w">Winter|w">Summer|w">BUCS)/i', $ln)) {
                     $period = get_text($ln,'w">','</a>');
                     $period_array[] = array('id' => $index, 'option'=> $period);
-                    //$period_array[] = array('option' => $period);
                     $index = $index + 1;
             }
         }
@@ -369,7 +365,3 @@
     function _isCurlInstalled() {
         return in_array('curl', get_loaded_extensions());
     }
-
-
-
-?>
