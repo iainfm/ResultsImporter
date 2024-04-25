@@ -3,6 +3,12 @@ body {
     margin: 10;
     padding: 0;
     background-color: #f4f4f4;
+    min-height: 100vh;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
 }
 
 table {
@@ -50,14 +56,16 @@ a:visited {
 }
 
 footer {
-    background-color: #f4f4f4; /* Change this to your preferred footer color */
+    /*
+    background-color: #f4f4f4;
     left: 0;
     right: 0;
     padding: 0px 10px;
     text-align: left;
     font-size: 0.8em;
-    color: #6c757d; /* Change this to your preferred text color */
-    border-top: 1px solid #dee2e6; /* Change this to your preferred border color */
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
     position: absolute;
-    bottom: 0;
+    bottom: 0;*/
+    margin-top: auto;
 }
