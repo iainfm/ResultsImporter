@@ -9,6 +9,7 @@ table {
     width: 80%;
     border-collapse: collapse;
     margin: 20px 0;
+    text-align: left;
 }
 
 table, th, td {

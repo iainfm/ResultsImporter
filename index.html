@@ -21,8 +21,10 @@
     <label for="ddTeam">Select a team:</label>
     <select id="ddTeam"></select>
 
-    <div id="content"></div>
+    <div id="content">
     <p></p>
+    </div>
+
     <div id = "url"></div>
     <p></p>
     <div id = "download">
@@ -36,10 +38,89 @@
         <p>
             Favicons by John Sorrentino, from the open source project Twemoji &copy; Twitter 2020. Used under the CC-BY 4.0 license.
         </p>
+        <p>
+            Table sorting function by <a href="https://www.w3schools.com/howto/howto_js_sort_table.asp">W3Schools</a>.
+        </p>
     </footer>
     <script>
 
-function download_table_as_csv(separator = ',') {
+    function sortTable(n) {
+        // Thanks to https://www.w3schools.com/howto/howto_js_sort_table.asp
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.querySelectorAll('table.team-summary')[0];
+        switching = true;
+
+        //Set the sorting direction to ascending:
+        dir = "asc"; 
+
+        // Loop until no switching has been done
+        while (switching) {
+        //start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+
+        // Loop through all table rows (except the first, which contains table headers)
+        for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            // Get the two elements to compare, one from current row and one from the next
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+            // Check if the two rows should switch place, based on the direction, asc or desc
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            // If a switch has been marked, make the switch and mark that a switch has been done
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+
+            //Each time a switch is done, increase this count by 1:
+            switchcount ++;      
+        } else {
+                // If no switching has been done AND the direction is "asc", set the direction to "desc" and run the while loop again.
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+
+    const rearrangeName = (name) => {
+        // Expects a name in the format "Title Initial<s> Surname" and returns it as "Surname, <Title> Initial<s>"
+        // convert name string into array, split by spaces
+        names = name.split(' ');
+
+        // Nothing to do if no spaces in name
+        if (names.length < 2) {
+            return name;
+        }
+
+        // get last name
+        const lastName = names[names.length - 1];
+
+        // get the initials/title
+        const initials = name.slice(0, name.indexOf(lastName)).trim();
+
+        // Mash it all together and return
+        return lastName + ', ' + initials;
+    }
+
+    function download_table_as_csv(separator = ',') {
         // Thanks to https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
         // Select rows from table
         var rows = document.querySelectorAll('table.team-summary tr');
@@ -73,7 +154,7 @@ function download_table_as_csv(separator = ',') {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        }
+    }
 
         var server_origin = window.location.origin;
         const ddSeason = document.getElementById('ddSeason');
@@ -82,6 +163,9 @@ function download_table_as_csv(separator = ',') {
         const contentDiv = document.getElementById('content');
         const urlDiv = document.getElementById('url');
         const dlDiv = document.getElementById('download');
+
+        // Hide the content area
+        contentDiv.style.display = 'none';
 
         // Hide the download link
         dlDiv.style.display = 'none';
@@ -118,6 +202,7 @@ function download_table_as_csv(separator = ',') {
                     contentDiv.innerHTML = '';
                     urlDiv.innerHTML = '';
                     dlDiv.style.display = 'none';
+                    contentDiv.style.display = 'none';
 
                     // Create a default option for the second dropdown
                     const defaultOption2 = document.createElement('option');
@@ -151,6 +236,7 @@ function download_table_as_csv(separator = ',') {
                     contentDiv.innerHTML = '';
                     urlDiv.innerHTML = '';
                     dlDiv.style.display = 'none';
+                    contentDiv.style.display = 'none';
 
                     // Create a default option for the third dropdown
                     const defaultOption3 = document.createElement('option');
@@ -202,6 +288,8 @@ function download_table_as_csv(separator = ',') {
                         contentDiv.innerHTML = resultsHTML;
 
                         // Fix the table in various ways
+                        // let total_rounds = table[0].cells.length - 3; // Total columns minus empty first two and the total column
+                        // let total_cards = table[1].cells.length - 3; // Total columns minus empty first two and the total column
                         let table = document.querySelectorAll('table.team-summary tr');
 
                         // Clear empty cells
@@ -210,6 +298,21 @@ function download_table_as_csv(separator = ',') {
 
                         // Replace NSRs with zero score
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('NSR', '0') }
+
+                        // Deal with multi-card rounds
+
+                        // Split up and colspans
+                        for (cell of table[0].cells) {
+                            if (cell.colSpan > 1) {
+                                cell.colSpan = 1;
+                                for (let i = 0; i < cell.colSpan; i++) {
+                                    newcell = cell.cloneNode(true);
+                                    cell.innerHTML = cell.innerHTML + 'C' + (i + 1);
+                                    newcell.innerHTML = newcell.innerHTML + 'C' + (i + 2);
+                                    cell.parentNode.insertBefore(newcell, cell.nextSibling);
+                                }
+                            }
+                        }
 
                         // Add a column for the average score
                         for (row of table) {
@@ -221,7 +324,7 @@ function download_table_as_csv(separator = ',') {
                         }
 
                         // Add the header for the average column and fix the <th></th> in the last cell of the header row
-                        last_hr.cells[1].outerHTML='<th>Average</th>';
+                        // last_hr.cells[1].outerHTML='<th>Average</th>';
                         last_hr.cells[last_hr.cells.length-1].outerHTML='<th>' + last_hr.cells[last_hr.cells.length-1].innerHTML + '</th>';
 
                         // Split average from name
@@ -230,7 +333,44 @@ function download_table_as_csv(separator = ',') {
                             row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;', '</td>')
                             }
 
+                        // Add titles for competitor and average into the first and second cell of the first row
+                        table[0].cells[0].innerHTML = 'Competitor';
+                        table[0].cells[1].innerHTML = 'Average<sup>*</sup>';
+                        // table[0].rows[0].cells[0].addEventListener('click', sortTable(0), false);
+
+                        // Add an id to the table for the sort function
+                        // table = document.querySelectorAll('table.team-summary')[0];
+                        // table.setAttribute("id", "ResultsTable");
+
+                        // Remove any th.score-heading cells (to avoid duplication in multi-card rounds)
+                        // Find any rows that match the score-heading style
+                        let sh_rows = document.querySelectorAll('th.score-heading');
+                        // And delete the parent row(s)
+                        for (sh_row of sh_rows) {
+                            sh_row.parentNode.remove();
+                        }
+
+                        // Rearrange the names to make them sortable by surname
+                        for (row of table) {
+                            row.cells[0].innerHTML = rearrangeName(row.cells[0].innerHTML);
+                        }
+
+                        // Make the headings sortable
+                        ths = document.querySelectorAll('table.team-summary th');
+                        let i = 0;
+                        for (th of ths) {
+                            th.setAttribute("onclick", "sortTable(" + i + ")");
+                            i++;
+                        }
+                        
+                        // Add an explanation for the average
+                        contentDiv.innerHTML += "<sup>*Average on entering the competition.</sup><p />";
+
                         dlDiv.style.display = 'block';
+                        contentDiv.style.display = 'block';
+
+
+
                     })
                     .catch(error => {
                         console.error('Error fetching new data:', error);
