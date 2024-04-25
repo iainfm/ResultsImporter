@@ -46,26 +46,29 @@
 
     function sortTable(n) {
         // Thanks to https://www.w3schools.com/howto/howto_js_sort_table.asp
-        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-        table = document.querySelectorAll('table.team-summary')[0];
-        switching = true;
+        // Refactored by copilot
+
+        const table = document.querySelectorAll('table.team-summary')[0];
+        let switching = true;
+        let switchcount = 0;
+        let i = 1;
 
         //Set the sorting direction to ascending:
-        dir = "asc"; 
+        let dir = "asc"; 
 
         // Loop until no switching has been done
         while (switching) {
         //start by saying: no switching is done:
         switching = false;
-        rows = table.rows;
+        const rows = table.rows;
 
         // Loop through all table rows (except the first, which contains table headers)
         for (i = 1; i < (rows.length - 1); i++) {
             //start by saying there should be no switching:
             shouldSwitch = false;
             // Get the two elements to compare, one from current row and one from the next
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 1].getElementsByTagName("TD")[n];
+            let x = rows[i].getElementsByTagName("TD")[n];
+            let y = rows[i + 1].getElementsByTagName("TD")[n];
 
             // Check if the two rows should switch place, based on the direction, asc or desc
             if (dir == "asc") {
@@ -121,42 +124,47 @@
     }
 
     function download_table_as_csv(separator = ',') {
-        // Thanks to https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
-        // Select rows from table
-        var rows = document.querySelectorAll('table.team-summary tr');
-        // Construct csv
-        var csv = [];
-        for (var i = 0; i < rows.length; i++) {
-            var row = [], cols = rows[i].querySelectorAll('td, th');
-            for (var j = 0; j < cols.length; j++) {
-                // Clean innertext to remove multiple spaces and jumpline (break csv)
-                var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+        // Based on https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
 
-                // remove non-printable and other non-valid chars
-                data = data.replace(/[^ -~]+/g, '');
+        // Get the rows from the table
+        const rows = document.querySelectorAll('table.team-summary tr');
 
-                // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
-                data = data.replace(/"/g, '""');
-                // Push escaped string
-                row.push('"' + data + '"');
-            }
-            csv.push(row.join(separator));
-        }
-        var csv_string = csv.join('\n');
-        // Download it
-        // var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
-        var filename = ddSeason.value + '_' + ddCompetition.options[ddCompetition.selectedIndex].text + '_' + ddTeam.options[ddTeam.selectedIndex].text + '.csv';
-        var link = document.createElement('a');
+        // Map the HTML table to an array (Copilot did this)
+        const csv = Array.from(rows).map(row => {
+            const cols = row.querySelectorAll('td, th');
+            return Array.from(cols).map(col => {
+                let data = col.innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+                data = data.replace(/[^ -~]+/g, '').replace(/"/g, '""');
+                return `"${data}"`;
+            }).join(separator);
+        });
+
+        // Concert the array to a string
+        const csv_string = csv.join('\n');
+        const { text: competitionText } = ddCompetition.options[ddCompetition.selectedIndex];
+        const { text: teamText } = ddTeam.options[ddTeam.selectedIndex];
+
+        // Create the filename based on the dropdowns
+        const filename = `${ddSeason.value}_${competitionText}_${teamText}.csv`;
+
+        // Create a secret link
+        const link = document.createElement('a');
         link.style.display = 'none';
         link.setAttribute('target', '_blank');
-        link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+        link.setAttribute('href', `data:text/csv;charset=utf-8,${encodeURIComponent(csv_string)}`);
         link.setAttribute('download', filename);
         document.body.appendChild(link);
+
+        // Click it to begin the download
         link.click();
+
+        // Then remove it
         document.body.removeChild(link);
+
     }
 
-        var server_origin = window.location.origin;
+        // Get some elements from the DOM
+        const server_origin = window.location.origin;
         const ddSeason = document.getElementById('ddSeason');
         const ddCompetition = document.getElementById('ddCompetition');
         const ddTeam = document.getElementById('ddTeam');
@@ -282,15 +290,13 @@
                     .then(response => response.json())
                     .then(newData => {
                         // Populate the content div with the new data
-                        for(var key in newData.data){
+                        for(const key in newData.data){
                             resultsHTML += newData.data[key];
                             }
                         contentDiv.innerHTML = resultsHTML;
 
                         // Fix the table in various ways
-                        // let total_rounds = table[0].cells.length - 3; // Total columns minus empty first two and the total column
-                        // let total_cards = table[1].cells.length - 3; // Total columns minus empty first two and the total column
-                        let table = document.querySelectorAll('table.team-summary tr');
+                        const table = document.querySelectorAll('table.team-summary tr');
 
                         // Clear empty cells
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('<th class="sep"></th>', '') }
@@ -300,8 +306,7 @@
                         for (row of table) { row.innerHTML = row.innerHTML.replaceAll('NSR', '0') }
 
                         // Deal with multi-card rounds
-
-                        // Split up and colspans
+                        // Split up any colspans
                         for (cell of table[0].cells) {
                             if (cell.colSpan > 1) {
                                 cell.colSpan = 1;
@@ -344,7 +349,7 @@
 
                         // Remove any th.score-heading cells (to avoid duplication in multi-card rounds)
                         // Find any rows that match the score-heading style
-                        let sh_rows = document.querySelectorAll('th.score-heading');
+                         sh_rows = document.querySelectorAll('th.score-heading');
                         // And delete the parent row(s)
                         for (sh_row of sh_rows) {
                             sh_row.parentNode.remove();
