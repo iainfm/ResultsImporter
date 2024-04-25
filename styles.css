@@ -54,6 +54,10 @@ a:visited {
     color: #0056b3;
 }
 
+select {
+    font-size: 1.0em;
+}
+
 /* Flexbox Method - https://matthewjamestaylor.com/bottom-footer */
 #flex-container {
     display:flex;
