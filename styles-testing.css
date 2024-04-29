@@ -35,7 +35,7 @@ tr:nth-child(odd) {
     background-color: #e2e2e2;
 }
 
-th:hover {
+th.score-heading:hover {
     background-color: #78b77a;
 }
 
