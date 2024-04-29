@@ -11,26 +11,30 @@
     <link rel="manifest" href="/images/site.webmanifest">
 </head>
 <body>
-    <h2>NSRA Results Importer</h2>
-    <label for="ddSeason">Select a season:</label>
-    <select id="ddSeason"></select>
+    <div id="flex-container">
+        <article>
+        <h2>NSRA Results Importer</h2>
+        <div class="dropdown-container">
+            <label for="ddSeason">Season:</label>
+            <select id="ddSeason"></select>
 
-    <label for="ddCompetition">Select a competition:</label>
-    <select id="ddCompetition"></select>
+            <label for="ddCompetition">Competition:</label>
+            <select id="ddCompetition"></select>
 
-    <label for="ddTeam">Select a team:</label>
-    <select id="ddTeam"></select>
+            <label for="ddTeam">Team:</label>
+            <select id="ddTeam"></select>
+        </div>
+        <div id="content">
+        <p></p>
+        </div>
 
-    <div id="content">
-    <p></p>
-    </div>
-
-    <div id = "url"></div>
-    <p></p>
-    <div id = "download">
-        <a href="#" onclick="download_table_as_csv();">Download as CSV</a>
-    </div>
-    <p />
+        <div id = "url"></div>
+        <p></p>
+        <div id = "download">
+            <a href="#" onclick="download_table_as_csv();">Download as CSV</a>
+        </div>
+        <p />
+    </article>
     <footer>
         <p>
             This site it not affiliated with the NSRA or X-Ring Software in any way. Use at your own risk. No responsibility is accepted for incorrect information.
@@ -42,6 +46,7 @@
             Table sorting function by <a href="https://www.w3schools.com/howto/howto_js_sort_table.asp">W3Schools</a>.
         </p>
     </footer>
+    </div>
     <script>
 
     function sortTable(n) {
