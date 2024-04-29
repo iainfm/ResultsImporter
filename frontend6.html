@@ -11,26 +11,32 @@
     <link rel="manifest" href="/images/site.webmanifest">
 </head>
 <body>
-    <h2>NSRA Results Importer</h2>
-    <label for="ddSeason">Select a season:</label>
-    <select id="ddSeason"></select>
+    <div id="flex-container">
+        <article>
+        <h2>NSRA Results Importer</h2>
+        <div class="dropdown-container">
+            <label for="ddSeason">Season:</label>
+            <select id="ddSeason"></select>
 
-    <label for="ddCompetition">Select a competition:</label>
-    <select id="ddCompetition"></select>
+            <label for="ddCompetition">Competition:</label>
+            <select id="ddCompetition"></select>
 
-    <label for="ddTeam">Select a team:</label>
-    <select id="ddTeam"></select>
+            <label for="ddTeam">Team:</label>
+            <select id="ddTeam"></select>
+        </div>
+        <div id="content">
+        <p></p>
+        </div>
 
-    <div id="content">
-    <p></p>
-    </div>
 
-    <div id = "url"></div>
-    <p></p>
-    <div id = "download">
-        <a href="#" onclick="download_table_as_csv();">Download as CSV</a>
-    </div>
-    <p />
+        <div id = "download">
+            <!--<a href="#" onclick="download_table_as_csv();">Download as CSV</a>-->
+            <button onclick="download_table_as_excel()">Download as Excel</button>
+        </div>
+        <p />
+        <p></p>
+        <div id = "url"></div>
+    </article>
     <footer>
         <p>
             This site it not affiliated with the NSRA or X-Ring Software in any way. Use at your own risk. No responsibility is accepted for incorrect information.
@@ -42,7 +48,7 @@
             Table sorting function by <a href="https://www.w3schools.com/howto/howto_js_sort_table.asp">W3Schools</a>.
         </p>
     </footer>
-
+    </div>
     <script>
 
     function sortTable(n) {
@@ -63,8 +69,16 @@
         switching = false;
         const rows = table.rows;
 
-        // Loop through all table rows (except the first, which contains table headers)
-        for (i = 1; i < (rows.length - 1); i++) {
+        // Check how many header rows there are and adjust the starting sort row accordingly
+        let first_i = 0;
+        for (row of rows) {
+            if (row.querySelector('th')) {
+                first_i++;
+            }
+        }
+
+        // Loop through all table rows (except the header row(s))
+        for (i = first_i; i < (rows.length - 1); i++) {
             //start by saying there should be no switching:
             shouldSwitch = false;
             // Get the two elements to compare, one from current row and one from the next
@@ -122,6 +136,19 @@
 
         // Mash it all together and return
         return lastName + ', ' + initials;
+    }
+
+    function download_table_as_excel() {
+        let table = document.getElementsByTagName("table");
+        const { text: competitionText } = ddCompetition.options[ddCompetition.selectedIndex];
+        const { text: teamText } = ddTeam.options[ddTeam.selectedIndex];
+
+        TableToExcel.convert(table[0], {
+            name: `${ddSeason.value}_${competitionText}_${teamText}.xlsx`,
+            sheet: {
+                name: `Team ${ddTeam[ddTeam.selectedIndex].value}`
+            }
+        });
     }
 
     function download_table_as_csv(separator = ',') {
@@ -308,6 +335,7 @@
 
                         // Deal with multi-card rounds
                         // Split up any colspans
+                        /* 
                         for (cell of table[0].cells) {
                             if (cell.colSpan > 1) {
                                 cell.colSpan = 1;
@@ -319,6 +347,7 @@
                                 }
                             }
                         }
+                        */
 
                         // Add a column for the average score
                         for (row of table) {
@@ -330,7 +359,6 @@
                         }
 
                         // Add the header for the average column and fix the <th></th> in the last cell of the header row
-                        // last_hr.cells[1].outerHTML='<th>Average</th>';
                         last_hr.cells[last_hr.cells.length-1].outerHTML='<th>' + last_hr.cells[last_hr.cells.length-1].innerHTML + '</th>';
 
                         // Split average from name
@@ -339,9 +367,31 @@
                             row.cells[0].outerHTML = row.cells[0].outerHTML.replace('&nbsp;', '</td>')
                             }
 
-                        // Add titles for competitor and average into the first and second cell of the first row
-                        table[0].cells[0].innerHTML = 'Competitor';
-                        table[0].cells[1].innerHTML = 'Average<sup>*</sup>';
+                        // Add titles for competitor and average into the first and second cell of the first row if
+                        // a single card round or the first and second cell of the second row if a multi-card round
+                        if (document.querySelectorAll('table.team-summary th.score-heading').length == 0) {
+                            table[0].cells[0].innerHTML = 'Competitor';
+                            table[0].cells[1].innerHTML = 'Average<sup>*</sup>';
+
+                            // Force the th class to be score-heading
+                            for (let j = 0; j < table[0].cells.length; j++) {
+                                table[0].cells[j].className = 'score-heading';
+                            }
+
+                        } else {
+                            table[1].cells[0].innerHTML = 'Competitor';
+                            table[1].cells[1].innerHTML = 'Average<sup>*</sup>';
+                            // Move the 'Total' heading to the second row for neatness
+                            table[1].cells[table[1].cells.length - 1].innerHTML = table[0].cells[table[0].cells.length - 1].innerHTML
+                            table[0].cells[table[0].cells.length - 1].innerHTML = '&nbsp;'
+                            table[1].cells[0].className = 'score-heading';
+                            table[1].cells[1].className = 'score-heading';
+                            table[1].cells[table[1].cells.length - 1].className = 'score-heading';
+                        }
+
+                        /* table[0].cells[0].innerHTML = 'Competitor';
+                        table[0].cells[1].innerHTML = 'Average<sup>*</sup>'; */
+
                         // table[0].rows[0].cells[0].addEventListener('click', sortTable(0), false);
 
                         // Add an id to the table for the sort function
@@ -350,11 +400,11 @@
 
                         // Remove any th.score-heading cells (to avoid duplication in multi-card rounds)
                         // Find any rows that match the score-heading style
-                         sh_rows = document.querySelectorAll('th.score-heading');
+                        /* sh_rows = document.querySelectorAll('th.score-heading');
                         // And delete the parent row(s)
                         for (sh_row of sh_rows) {
                             sh_row.parentNode.remove();
-                        }
+                        } */
 
                         // Rearrange the names to make them sortable by surname
                         for (row of table) {
@@ -362,11 +412,33 @@
                         }
 
                         // Make the headings sortable
-                        ths = document.querySelectorAll('table.team-summary th');
+                        if (document.querySelectorAll('table.team-summary th.score-heading').length == 0) {
+                            ths = document.querySelectorAll('table.team-summary th');
+                        } else {
+                            ths = document.querySelectorAll('table.team-summary th.score-heading');
+                        }
+
                         let i = 0;
                         for (th of ths) {
                             th.setAttribute("onclick", "sortTable(" + i + ")");
                             i++;
+                        }
+
+                        // Remove any whitespace from the td elements
+                        for (row of table) {
+                            for (cell of row.cells) {
+                                cell.innerHTML = cell.innerHTML.replace('&nbsp;', '');
+                                cell.innerHTML = cell.innerHTML.trim();
+                            }
+                        }
+
+                        // Set the data-t attribute to 'n' for all numeric cells
+                        for (row of table) {
+                            for (cell of row.cells) {
+                                if (!isNaN(cell.innerHTML) && cell.innerHTML != '') {
+                                    cell.setAttribute('data-t', 'n');
+                                }
+                            }
                         }
                         
                         // Add an explanation for the average
@@ -375,18 +447,15 @@
                         dlDiv.style.display = 'block';
                         contentDiv.style.display = 'block';
 
-
-
                     })
                     .catch(error => {
                         console.error('Error fetching new data:', error);
                     });
             });
 
-            
     </script>
-    <!-- Table to Excel exporter library -->
-    <script defer src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-    <script defer src="//cdn.rawgit.com/rainabba/jquery-table2excel/1.1.0/dist/jquery.table2excel.min.js"></script>
+    <!-- Excel exporter libraries-->
+    <script defer src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/linways/table-to-excel@v1.0.4/dist/tableToExcel.js"></script>
 </body>
 </html>
