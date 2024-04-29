@@ -1,0 +1,78 @@
+<html>
+    <!-- https://www.c-sharpcorner.com/article/how-to-export-html-table-in-excel-using-jquery/ -->
+    <body>
+        <h3 class="table-header font-weight-bold"> <u> User Management </u> </h3>
+<div class="Row" style="display: flex; justify-content: space-between;">
+
+    <div class="col-sm-6 ">
+        <button class="btn btn-secondary btn-lg" type="button" aria-pressed="true">  <a class="text-white" href="Add_User"> Add User </a></button>
+    </div>
+    <div class="col-sm-6 ">
+
+        <button type="button" class="btn btn-primary" id="btnExport" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" style="padding: 9px; margin-left: 78%;">Export Report
+        </button>
+    </div>
+</div>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                    <table class="table table-sm table-hover my-0 mydatatable" id="mydatatable" style=" text-align:center">
+                        <thead class="text-center">
+                            <tr>
+                                <th>S.No</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Type</th>
+                                <th>Created Date</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td>1</td>
+                                <td>Name 1</td>
+                                <td>Email 1</td>
+                                <td>Phone 1</td>
+                                <td>Type 1</td>
+                                <td>Date 1</td>
+                            </tr>
+
+                            <tr>
+                                <td>2</td>
+                                <td>Name 2</td>
+                                <td>Email 2</td>
+                                <td>Phone 2</td>
+                                <td>Type 2</td>
+                                <td>Date 2</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/linways/table-to-excel@v1.0.4/dist/tableToExcel.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#btnExport").click(function () {
+            let table = document.getElementsByTagName("table");
+            console.log(table);
+            // debugger;
+            TableToExcel.convert(table[0], {
+                name: `UserManagement.xlsx`,
+                sheet: {
+                    name: 'Usermanagement'
+                }
+            });
+        });
+    });
+</script>
+    </body>
+</html>
